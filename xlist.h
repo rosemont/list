@@ -3,6 +3,9 @@
  *
  */
 
+#ifndef __XLIST_H__
+#define __XLIST_H__
+
 #include <iostream>
 using namespace std;
 
@@ -14,16 +17,31 @@ struct node {
 
 class xlist {
   public:
+    class iterator {
+      friend xlist;
+      public:
+      iterator():nodep(nullptr){}
+      int operator *() {return nodep->data;}
+      void operator++() {nodep = nodep->next;}
+      void operator--() {nodep = nodep->prev;}
+      bool operator!=(iterator itor2) {return (nodep!=itor2.nodep);}
+      private:
+      iterator(node* pos):nodep(pos){}
+      node* nodep;
+    };
+
     xlist(){head=new node(); head->next = head; head->prev = head;}
     xlist(const xlist& list1);
     xlist& operator = (const xlist &rhs);
+    iterator begin() {return iterator(head->next);}
+    iterator end() {return iterator(head);}
     void pushfront(const int &val);
     void pushback(const int &val);
     int size();
     bool empty();
     void showme();
     void clear();
-    ~xlist();
+    virtual ~xlist();
   private:
     node *head;
 };
@@ -52,6 +70,7 @@ xlist& xlist::operator = (const xlist &rhs)
       cur = cur->next;
     }
   }
+  return *this;
 }
 
 void xlist::pushfront(const int &val)
@@ -102,7 +121,7 @@ void xlist::showme()
 
 void xlist::clear() {
   node* cur(head->next);
-  
+
   while (cur != head) {
     cur = cur->next;
     delete cur->prev;
@@ -115,3 +134,4 @@ xlist::~xlist()
   delete head;
 }
 
+#endif // __XLIST_H__

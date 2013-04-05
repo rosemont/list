@@ -15,6 +15,11 @@ int main() {
 
   xlist newlist(mylist);
   newlist.showme();
+  
+  xlist::iterator itor;
+  for (itor=mylist.begin(); itor!=mylist.end(); ++itor)
+    cout << *itor << " . ";
+  cout << endl;
 }
 
 
