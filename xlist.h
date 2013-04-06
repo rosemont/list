@@ -1,5 +1,5 @@
 /* a rather concise non-template list implementation
- *
+ * a doubly linked list
  *
  */
 
@@ -15,6 +15,7 @@ struct _list_node {
 struct _list_iterator {
   typedef _list_iterator    _Self;
   typedef _list_node        _Node;
+  typedef std::ptrdiff_t               difference_type;
   typedef int*        pointer;
   typedef int&        reference;
 
@@ -65,6 +66,9 @@ struct _list_const_iterator {
   typedef const _list_node        _Node;
   typedef _list_iterator          iterator;
 
+  typedef std::ptrdiff_t               difference_type;
+  typedef std::bidirectional_iterator_tag iterator_category;
+  typedef int                     value_type;
   typedef const int*              pointer;
   typedef const int&              reference;
 
@@ -118,26 +122,57 @@ class xlist {
   public:
     typedef _list_iterator           iterator;
     typedef _list_const_iterator      const_iterator;
+    typedef int&                            reference;
+    typedef const int&                      const_reference;
+    typedef std::ptrdiff_t                 difference_type;
+    typedef size_t                          size_type;
 
+    // list default constructor
     xlist(){head=new _list_node(); head->next = head; head->prev = head;}
+    // list copy constructor
     xlist(const xlist& __x) 
     { 
       _init();
       _initialize_dispatcher(__x.begin(), __x.end()); 
     }
-    xlist& operator = (const xlist &rhs);
+    xlist(const_iterator __first, const_iterator __last)
+    { _init();
+      _initialize_dispatcher(__first, __last);
+    }
+    // list assignment operator
+    xlist& operator = (const xlist &__x);
     iterator begin() {return iterator(head->next);}
     iterator end() {return iterator(head);}
     const_iterator 
       begin() const
-    { return const_iterator(head->next); }
+      { return const_iterator(head->next); }
     const_iterator 
       end() const
-    { return const_iterator(head); }
+      { return const_iterator(head); }
     void push_front(const int &val);
     void push_back(const int &val);
-    int size();
+    size_type size() const {return std::distance(begin(), end()); }
     bool empty();
+    reference
+      front()
+      { return *begin();}
+    const_reference
+      front() const
+      { return *begin(); }
+    reference
+      back()
+      {
+        iterator __tmp = end();
+        --__tmp;
+        return *__tmp;
+      }
+    const_reference
+      back() const
+      {
+        const_iterator __tmp = end();
+        --__tmp;
+        return *__tmp;
+      }
     void clear();
     virtual ~xlist();
   protected:
@@ -150,21 +185,8 @@ class xlist {
   private:
     _list_node *head;
 };
-/*
-xlist::xlist(const xlist& listobj)
-{
-  head = new _list_node;
-  head->next = head;
-  head->prev = head;
 
-  _list_node* cur;
-  cur = listobj.head->next;
-  while (cur != listobj.head) {
-    push_back(cur->data);
-    cur = cur->next;
-  }
-}
-*/
+// list assignment operator
 xlist& xlist::operator = (const xlist &rhs)
 {
   if (this != &rhs) {
@@ -204,14 +226,6 @@ void xlist::push_back(const int &val)
 bool xlist::empty()
 {
   return (head==head->next);
-}
-
-int xlist::size()
-{
-  int count(0);
-  _list_node *cur = head->next;
-  while (cur != head) count++;
-  return count;
 }
 
 void xlist::clear() {
